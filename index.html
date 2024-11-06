@@ -29,54 +29,36 @@
             <!-- <option value="against_human">Human</option> -->
           </select>
         </div>
-        <div class="flex flex-col mt-3">
-          <div class="flex">
-            <div
-              class="xo_boxes h-10 w-10 border-gray-800 border"
-              id="box-11"
-            ></div>
-            <div
-              class="xo_boxes h-10 w-10 border-gray-800 border"
-              id="box-12"
-            ></div>
-            <div
-              class="xo_boxes h-10 w-10 border-gray-800 border"
-              id="box-13"
-            ></div>
-          </div>
-          <div class="flex">
-            <div
-              class="xo_boxes h-10 w-10 border-gray-800 border"
-              id="box-21"
-            ></div>
-            <div
-              class="xo_boxes h-10 w-10 border-gray-800 border"
-              id="box-22"
-            ></div>
-            <div
-              class="xo_boxes h-10 w-10 border-gray-800 border"
-              id="box-23"
-            ></div>
-          </div>
-          <div class="flex">
-            <div
-              class="xo_boxes h-10 w-10 border-gray-800 border"
-              id="box-31"
-            ></div>
-            <div
-              class="xo_boxes h-10 w-10 border-gray-800 border"
-              id="box-32"
-            ></div>
-            <div
-              class="xo_boxes h-10 w-10 border-gray-800 border"
-              id="box-3"
-            ></div>
-          </div>
-        </div>
+        <div class="flex flex-col mt-3" id="box-container"></div>
       </div>
     </main>
     <footer></footer>
 
-    <script></script>
+    <script>
+      // DOM Variables
+      const boxContainer = document.getElementById("box-container");
+      // =============== Initializing X-O Boxes ================
+      const boxElements = Array(3);
+      for (let currentRow = 0; currentRow < boxElements.length; currentRow++) {
+        boxElements[currentRow] = Array(3);
+        const rowElement = document.createElement("div");
+        rowElement.classList.add("flex");
+        boxContainer.appendChild(rowElement);
+        for (
+          let currentCol = 0;
+          currentCol < boxElements[currentRow].length;
+          currentCol++
+        ) {
+          console.log("sjdfn");
+          const colElement = document.createElement("div");
+          colElement.classList.add(
+            ..."h-10 w-10 border-gray-800 border".split(" ")
+          );
+          rowElement.appendChild(colElement);
+          boxElements[currentRow][currentCol] = colElement;
+        }
+      }
+      // create an xoEngine which will automatically play, for now select a random box
+    </script>
   </body>
 </html>
