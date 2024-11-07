@@ -14,20 +14,38 @@
     <main>
       <div class="flex flex-col items-center">
         <h1 class="text-3xl font-bold">X - O</h1>
-        <div>
-          <label
-            for="play_against_select"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >Play Against?
-          </label>
-          <select
-            name=""
-            id="play_against_select"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-          >
-            <option value="against_computer">Computer</option>
-            <!-- <option value="against_human">Human</option> -->
-          </select>
+        <div class="flex space-x-3">
+          <div>
+            <label
+              for="play_against_select"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >Play Against?
+            </label>
+            <select
+              name=""
+              id="play_against_select"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+            >
+              <option value="against_computer">Computer</option>
+              <!-- <option value="against_human">Human</option> -->
+            </select>
+          </div>
+          <div>
+            <label
+              for="play_against_select"
+              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >Choose Your Type
+            </label>
+            <select
+              name=""
+              id="user_choice_select"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+            >
+              <option value="type_o">O</option>
+              <option value="type_x">X</option>
+              <!-- <option value="against_human">Human</option> -->
+            </select>
+          </div>
         </div>
         <div class="flex flex-col mt-3" id="box-container"></div>
       </div>
@@ -35,8 +53,18 @@
     <footer></footer>
 
     <script>
+      // ============= Global Variables =============
+      let gameStarted = false;
+      const xoType = {
+        X: "X",
+        O: "O",
+      };
+      let userChoice = xoType.O;
+
       // DOM Variables
       const boxContainer = document.getElementById("box-container");
+      const userChoiceSelect = document.getElementById("user_choice_select");
+
       // =============== Initializing X-O Boxes ================
       const boxElements = Array(3);
       for (let currentRow = 0; currentRow < boxElements.length; currentRow++) {
@@ -49,15 +77,162 @@
           currentCol < boxElements[currentRow].length;
           currentCol++
         ) {
-          console.log("sjdfn");
           const colElement = document.createElement("div");
           colElement.classList.add(
-            ..."h-10 w-10 border-gray-800 border".split(" ")
+            ..."h-20 w-20 border-gray-800 border text-center text-4xl mb-auto".split(
+              " "
+            )
           );
           rowElement.appendChild(colElement);
           boxElements[currentRow][currentCol] = colElement;
         }
       }
+
+      // ============= Event Listeners =========================
+      userChoiceSelect.addEventListener("change", (event) => {
+        const type = event.target.value === "type_x" ? xoType.X : xoType.O;
+        userChoice = type;
+      });
+
+      document.addEventListener("click", (event) => {
+        // Return if the event is not inside box container
+        if (!boxContainer.contains(event.target)) return;
+
+        if (!gameStarted) {
+          // If game is not started before, then change the flag and disable selecting choice
+          gameStarted = true;
+          userChoiceSelect.setAttribute("disabled", "true");
+        }
+
+        let selectedBox = null;
+
+        const position = {
+          row: null,
+          col: null,
+        };
+
+        for (
+          let currentRow = 0;
+          currentRow < boxElements.length;
+          currentRow++
+        ) {
+          for (
+            let currentCol = 0;
+            currentCol < boxElements[currentRow].length;
+            currentCol++
+          ) {
+            if (boxElements[currentRow][currentCol].contains(event.target)) {
+              selectedBox = boxElements[currentRow][currentCol];
+              position.row = currentRow;
+              position.col = currentCol;
+              break;
+            }
+          }
+          if (selectedBox) break;
+        }
+
+        if (!selectedBox) return;
+
+        handleUserSelect(selectedBox, position);
+      });
+
+      async function handleUserSelect(selectedBox, position) {
+        // If there is something already selected, then return
+        if (selectedBox.innerHTML) return;
+
+        selectedBox.innerHTML = userChoice;
+        await causeDelay(1000);
+        if (checkIfGameOver(userChoice, position)) {
+          alert("You Won!!!");
+          window.location.reload();
+        }
+      }
+
+      function checkIfGameOver(xoType, position) {
+        // Check if this is the middle Position
+        if (position.row === 1 && position.col === 1) {
+          if (checkCol(xoType, position.col)) return true;
+          if (checkRow(xoType, position.row)) return true;
+          if (checkDiaglonal(xoType, 0)) return true;
+          if (checkDiaglonal(xoType, 1)) return true;
+          return false;
+        }
+        const cornerType = getCornerType(position.row, position.col);
+
+        if (cornerType === 0 || cornerType === 1) {
+          if (checkCol(xoType, position.col)) return true;
+          if (checkRow(xoType, position.row)) return true;
+          if (checkDiaglonal(xoType, cornerType)) return true;
+          return false;
+        } else {
+          if (checkCol(xoType, position.col)) return true;
+          if (checkRow(xoType, position.row)) return true;
+          return false;
+        }
+      }
+
+      function checkCol(xoType, column) {
+        let flag = true;
+        for (let rowElement of boxElements) {
+          if (rowElement[column].innerHTML !== xoType) {
+            flag = false;
+            break;
+          }
+        }
+        return flag;
+      }
+
+      function checkRow(xoType, row) {
+        let flag = true;
+        for (let colElement of boxElements[row]) {
+          if (colElement.innerHTML !== xoType) {
+            flag = false;
+            break;
+          }
+        }
+        return flag;
+      }
+
+      function checkDiaglonal(xoType, cornerType) {
+        if (cornerType === 0) {
+          for (let index = 0; index < 3; index++) {
+            if (boxElements[index][index].innerHTML !== xoType) {
+              return false;
+            }
+          }
+          return true;
+        } else if (cornerType === 1) {
+          for (
+            let currentRow = 0, currentCol = 2;
+            currentRow < 3 && currentCol >= 0;
+            currentRow++, currentCol--
+          ) {
+            if (boxElements[currentRow][currentCol].innerHTML !== xoType) {
+              return false;
+            }
+          }
+          return true;
+        }
+      }
+
+      // ============ Helpers ==============
+      function toggleXoOption(option) {
+        return option === xoType.O ? xoType.X : xoType.O;
+      }
+
+      function getCornerType(row, col) {
+        if (row === 0 && col === 0) return 0;
+        if (row === 2 && col === 2) return 0;
+
+        if (row === 2 && col === 0) return 1;
+        if (row === 0 && col === 2) return 1;
+
+        return -1;
+      }
+
+      const causeDelay = (delay = 500) =>
+        new Promise((resolve) => setTimeout(resolve, delay));
+
       // create an xoEngine which will automatically play, for now select a random box
     </script>
   </body>
