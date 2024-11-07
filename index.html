@@ -141,11 +141,11 @@
         if (selectedBox.innerHTML) return;
 
         selectedBox.innerHTML = userChoice;
-        await causeDelay(1000);
+        await causeDelay(200);
         if (checkIfGameOver(userChoice, position)) {
           alert("You Won!!!");
           window.location.reload();
-        }
+        } else computerTurn();
       }
 
       function checkIfGameOver(xoType, position) {
@@ -215,6 +215,34 @@
         }
       }
 
+      function computerTurn() {
+        console.log("Inside computer turn");
+        const computerChoice = toggleXoOption(userChoice);
+
+        async function selectChoice() {
+          const randomRow = Math.floor(Math.random() * 3);
+          const randomCol = Math.floor(Math.random() * 3);
+
+          // If already selected
+          if (boxElements[randomRow][randomCol].innerHTML) {
+            selectChoice();
+          } else {
+            boxElements[randomRow][randomCol].innerHTML = computerChoice;
+            await causeDelay(500);
+            if (
+              checkIfGameOver(computerChoice, {
+                row: randomRow,
+                col: randomCol,
+              })
+            ) {
+              alert("Computer Won");
+              window.location.reload();
+            }
+          }
+        }
+        selectChoice();
+      }
+
       // ============ Helpers ==============
       function toggleXoOption(option) {
         return option === xoType.O ? xoType.X : xoType.O;
@@ -232,8 +260,6 @@
 
       const causeDelay = (delay = 500) =>
         new Promise((resolve) => setTimeout(resolve, delay));
-
-      // create an xoEngine which will automatically play, for now select a random box
     </script>
   </body>
 </html>
